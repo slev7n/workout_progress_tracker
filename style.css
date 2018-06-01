@@ -1,11 +1,35 @@
-/*#container {
-	display: grid;
-	grid-template-columns: repeat(3, 100px);
-	grid-auto-rows: minmax(100px, auto);
-	border:1px solid;
+.workout {
+    display: grid;
+    grid-gap: 5px;
+    width: 300px;
+    grid-template-columns: repeat(5, 1fr);
+    margin-bottom: 46px;
 }
 
-#addSet {
-	grid-column:2/-2;
+.workout .title, .workout .total, .workout .add-set {
+    grid-column: 1/-1;
 }
-*/
+
+.workout .reps {
+	grid-column: 2/-1;
+}
+
+.workout .title {
+	text-align: center;
+}
+
+.workout .title:empty::before {
+	content: attr(placeholder);
+	display: block;
+	text-align: center;
+}
+
+.workout .total::before {
+	content: 'Total';
+	display: block;
+	text-align: center;
+}
+
+.workout > * {
+    border: 1px solid;
+}

@@ -8,7 +8,8 @@ function Workout(parent) {
 		wrapper.setAttribute('class', 'workout');
 
 	let title = document.createElement('div');
-		title.setAttribute('contenteditable', 'true');;
+		title.setAttribute('contenteditable', 'true');
+		title.setAttribute('placeholder', 'Workout Title');
 		title.setAttribute('class', 'title');
 
 	let total = document.createElement('div');
@@ -22,20 +23,19 @@ function Workout(parent) {
 	let storage = {
 		set: function() {
 			let arr = [];
-			let obj = {};
-				obj.title = '';
-				obj.reps = [];
 			document.querySelectorAll('.workout').forEach(function(workout) {
+				let obj = {};
 				obj.title = workout.querySelector('.title').innerText;
+				obj.reps = [];
 				workout.querySelectorAll('.reps').forEach(function(rep) {
 					obj.reps.unshift(parseInt(rep.value));
 				});
-				arr.unshift(obj);
+				arr.push(obj);
 				localStorage['workout'] = JSON.stringify(arr);
 			});
 		},
-		get: function() {
-			return JSON.parse(localStorage['workout']);
+		get: function(fn) {
+			fn(JSON.parse(localStorage['workout']));
 		}
 	}
 
@@ -72,8 +72,9 @@ function Workout(parent) {
 	parentEl.appendChild(wrapper);
 
 	try {
-		let arr = JSON.parse(localStorage['workout']);
-
+		storage.get(function(data) {
+			console.log(data);
+		});
 	} catch(e) {
 		console.log(e.message);
 		generate.call(addSet);
