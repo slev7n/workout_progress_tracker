@@ -1,11 +1,23 @@
 
 
 function Workout(parent) {
+	let root = this;
 	let parentEl = parent || document.body;
 	let setCount = 1;
 
-	let wrapper = document.createElement('div');
-		wrapper.setAttribute('class', 'workout');
+	let workout = document.createElement('div');
+		workout.setAttribute('class', 'workout');
+
+	this.setTitle = function(newTitle) {
+		title.innerText = newTitle;
+	}
+
+	this.getTitle = function() {
+		return title.innerText;
+	}
+
+	let setRep = document.createElement('div');
+	setRep.setAttribute('class', 'set-rep');
 
 	let title = document.createElement('div');
 		title.setAttribute('contenteditable', 'true');
@@ -14,72 +26,71 @@ function Workout(parent) {
 
 	let total = document.createElement('div');
 		total.setAttribute('class', 'total');
-		total.innerText = 0;
+	this.getTotal = function() {
+		let totalCount = 0;
+		[].slice.call(setRep.querySelectorAll('.reps')).forEach(function(rep) {
+			if(rep.value && Number.isInteger(parseInt(rep.value))) {
+				totalCount += parseInt(rep.value);
 
-	let addSet = document.createElement('button');
-		addSet.setAttribute('class', 'add-set');
-		addSet.innerText = '+';
+			}
+		});
+		return totalCount;
+	}
 
-	let storage = {
-		set: function() {
-			let arr = [];
-			document.querySelectorAll('.workout').forEach(function(workout) {
-				let obj = {};
-				obj.title = workout.querySelector('.title').innerText;
-				obj.reps = [];
-				workout.querySelectorAll('.reps').forEach(function(rep) {
-					obj.reps.unshift(parseInt(rep.value));
-				});
-				arr.push(obj);
-				localStorage['workout'] = JSON.stringify(arr);
+	this.setTotal = function() {
+		total.innerText = this.getTotal();
+	}
+
+	this.removeSets = function() {
+		[].slice.call(setRep.children).forEach(el => el.parentElement.removeChild(el));
+	}
+
+	this.addSet = function(setsArray) {
+		if(setsArray && !setsArray.target) {
+			this.removeSets();
+			setsArray.forEach(function(el, i) {
+				let set = document.createElement('div');
+					set.setAttribute('class', 'sets');
+					set.innerText = i + 1;
+				let rep = document.createElement('input');
+					rep.setAttribute('type', 'text');
+					rep.setAttribute('class', 'reps');
+					rep.value = el;
+				setRep.insertBefore(set, setRep.children[0]);
+				setRep.insertBefore(rep, set);
+				root.setTotal();
 			});
-		},
-		get: function(fn) {
-			fn(JSON.parse(localStorage['workout']));
+		} else {
+			let set = document.createElement('div');
+				set.setAttribute('class', 'sets');
+				set.innerText = setCount++;
+
+			let rep = document.createElement('input');
+				rep.setAttribute('type', 'text');
+				rep.setAttribute('class', 'reps');
+				rep.addEventListener('keyup', this.setTotal.bind(this));
+				rep.addEventListener('focus', function() {
+					this.select();
+				});
+				rep.value = 0;
+				setRep.insertBefore(set, setRep.children[0]);
+				setRep.insertBefore(rep, set);
 		}
 	}
 
-	let makeTotal = function() {
-		let totalCount = 0;
-		let obj_arr = [];
-		this.parentElement.querySelectorAll('.reps').forEach(function(el) {
-			let value = parseInt(el.value);
-			if(Number.isInteger(value)) {
-				totalCount += value;
-				obj_arr.unshift({reps: value});
-			}
-		});
-		this.parentElement.querySelector('.total').innerText = totalCount;
-		storage.set();
-	}
+	let addSetBtn = document.createElement('button');
+		addSetBtn.setAttribute('class', 'add-set');
+		addSetBtn.innerText = '+';
+		addSetBtn.addEventListener('click', this.addSet.bind(this));
 
-	let generate = function() {
-		let set = document.createElement('div');
-			set.setAttribute('class', 'sets');
-			set.innerText = setCount++;
+	parentEl.appendChild(workout);
+	workout.appendChild(title);
+	workout.appendChild(total);
+	workout.appendChild(addSetBtn);
+	workout.appendChild(setRep);
 
-		let rep = document.createElement('input');
-			rep.setAttribute('type', 'text');
-			rep.setAttribute('class', 'reps');
-			rep.addEventListener('keyup', makeTotal);
-		this.parentElement.insertBefore(rep, this.nextElementSibling);
-		this.parentElement.insertBefore(set, rep);
-	}
-
-	wrapper.appendChild(title);
-	wrapper.appendChild(total);
-	wrapper.appendChild(addSet);
-	parentEl.appendChild(wrapper);
-
-	try {
-		storage.get(function(data) {
-			console.log(data);
-		});
-	} catch(e) {
-		console.log(e.message);
-		generate.call(addSet);
-		addSet.addEventListener('click', generate);
-	}
+	this.addSet();
+	this.setTotal();
 }
 
 new Workout();
