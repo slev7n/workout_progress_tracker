@@ -3,10 +3,50 @@
 function Workout(parent) {
 	let root = this;
 	let parentEl = parent || document.body;
+	localStorage['workout'] = localStorage['workout'] || '[]';
 	let setCount = 1;
 
 	let workout = document.createElement('div');
 		workout.setAttribute('class', 'workout');
+
+	let setRep = document.createElement('div');
+		setRep.setAttribute('class', 'set-rep');
+
+	let title = document.createElement('div');
+		title.setAttribute('contenteditable', 'true');
+		title.setAttribute('placeholder', 'Workout Title');
+		title.setAttribute('class', 'title');
+		title.addEventListener('blur', function() {
+			root.storage.get(function(data) {
+				data[data.indexOf(root)].setTitle(this.innerText);
+				this.set(data);
+			});
+		});
+
+
+	let total = document.createElement('div');
+		total.setAttribute('class', 'total');
+
+	let addSetBtn = document.createElement('button');
+		addSetBtn.setAttribute('class', 'add-set');
+		addSetBtn.innerText = '+';
+
+	this.storage = {};
+
+	this.storage.set = function(data) {
+		localStorage['workout'] = JSON.stringify(data);
+	}
+
+	this.storage.get = function(fn) {
+		fn(JSON.parse(localStorage['workout']));
+	}
+
+	this.storage.get(function(data) {
+		if(data.indexOf(root) < 0) {
+			data.push(root);
+			root.storage.set(data);
+		}
+	});
 
 	this.setTitle = function(newTitle) {
 		title.innerText = newTitle;
@@ -15,17 +55,6 @@ function Workout(parent) {
 	this.getTitle = function() {
 		return title.innerText;
 	}
-
-	let setRep = document.createElement('div');
-	setRep.setAttribute('class', 'set-rep');
-
-	let title = document.createElement('div');
-		title.setAttribute('contenteditable', 'true');
-		title.setAttribute('placeholder', 'Workout Title');
-		title.setAttribute('class', 'title');
-
-	let total = document.createElement('div');
-		total.setAttribute('class', 'total');
 	this.getTotal = function() {
 		let totalCount = 0;
 		[].slice.call(setRep.querySelectorAll('.reps')).forEach(function(rep) {
@@ -69,19 +98,21 @@ function Workout(parent) {
 				rep.setAttribute('type', 'text');
 				rep.setAttribute('class', 'reps');
 				rep.addEventListener('keyup', this.setTotal.bind(this));
+				rep.addEventListener('keyup', function(e) {
+					if(e.keyCode == 13)
+						root.addSet();
+				});
 				rep.addEventListener('focus', function() {
 					this.select();
 				});
 				rep.value = 0;
 				setRep.insertBefore(set, setRep.children[0]);
 				setRep.insertBefore(rep, set);
+				rep.focus();
 		}
 	}
 
-	let addSetBtn = document.createElement('button');
-		addSetBtn.setAttribute('class', 'add-set');
-		addSetBtn.innerText = '+';
-		addSetBtn.addEventListener('click', this.addSet.bind(this));
+	addSetBtn.addEventListener('click', this.addSet.bind(this));
 
 	parentEl.appendChild(workout);
 	workout.appendChild(title);
@@ -93,10 +124,11 @@ function Workout(parent) {
 	this.setTotal();
 }
 
-new Workout();
-new Workout();
-new Workout();
+document.querySelector('#addWorkout').addEventListener('click', function(e) {
+	new Workout(document.getElementById('container'));
+});
 
+new Workout(document.getElementById('container'));
 
 
 
