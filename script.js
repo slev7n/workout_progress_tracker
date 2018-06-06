@@ -55,7 +55,7 @@ function Workout(parent) {
 	this.getTitle = function() {
 		return title.innerText;
 	}
-	this.getTotal = function() {
+	this.getTotalReps = function() {
 		let totalCount = 0;
 		[].slice.call(setRep.querySelectorAll('.reps')).forEach(function(rep) {
 			if(rep.value && Number.isInteger(parseInt(rep.value))) {
@@ -66,8 +66,16 @@ function Workout(parent) {
 		return totalCount;
 	}
 
-	this.setTotal = function() {
-		total.innerText = this.getTotal();
+	this.setTotalReps = function() {
+		total.innerText = this.getTotalReps();
+	}
+
+	this.getTotalSets = function() {
+		return setRep.querySelectorAll('.reps').length;
+	}
+
+	this.getAverage = function() {
+		return parseInt(this.getTotalReps()) / parseInt(this.getTotalSets());
 	}
 
 	this.removeSets = function() {
@@ -87,7 +95,7 @@ function Workout(parent) {
 					rep.value = el;
 				setRep.insertBefore(set, setRep.children[0]);
 				setRep.insertBefore(rep, set);
-				root.setTotal();
+				root.setTotalReps();
 			});
 		} else {
 			let set = document.createElement('div');
@@ -97,7 +105,7 @@ function Workout(parent) {
 			let rep = document.createElement('input');
 				rep.setAttribute('type', 'text');
 				rep.setAttribute('class', 'reps');
-				rep.addEventListener('keyup', this.setTotal.bind(this));
+				rep.addEventListener('keyup', this.setTotalReps.bind(this));
 				rep.addEventListener('keyup', function(e) {
 					if(e.keyCode == 13)
 						root.addSet();
@@ -121,7 +129,7 @@ function Workout(parent) {
 	workout.appendChild(setRep);
 
 	this.addSet();
-	this.setTotal();
+	this.setTotalReps();
 }
 
 document.querySelector('#addWorkout').addEventListener('click', function(e) {
