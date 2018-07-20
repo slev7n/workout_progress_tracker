@@ -1,5 +1,14 @@
+localStorage['WorkoutApp'] = localStorage['WorkoutApp'] || JSON.stringify([]);
+
+let foo = JSON.parse(localStorage['WorkoutApp']);
+
+if(foo.length > 0)
+	foo.forEach(el => new Workout(el));
+else
+	new Workout();
+
 function Workout(obj, parent) {
-	obj = obj || {created_on: new Date().getTime(), sets: [55,66,55], title: 'Workout', status: ''};
+	obj = obj || {created_on: new Date().getTime(), sets: [], title: 'Workout', status: ''};
 	parent = parent || document.body;
 
 	let root = this;
@@ -15,6 +24,7 @@ function Workout(obj, parent) {
 		title.innerText = obj.title;
 		title.addEventListener('blur', function() {
 			obj.title = this.innerText;
+			root.save();
 		});
 
 	let setBox = document.createElement('div');
@@ -49,6 +59,7 @@ function Workout(obj, parent) {
 			reps.addEventListener('blur', function() {
 				root.setTotal();
 				obj.sets[[].slice.call(setBox.children).indexOf(this.parentElement)] = parseInt(this.value);
+				root.save();
 			});
 			reps.addEventListener('focus', function() {
 				this.select();
@@ -83,8 +94,15 @@ function Workout(obj, parent) {
 	wrapper.appendChild(setBox);
 	parent.appendChild(wrapper);
 
-	this.json = function() {
-		return obj;
+	this.save = function() {
+		let storage_arr = JSON.parse(localStorage['WorkoutApp']);
+		let workout_arr = storage_arr.filter(el => el.created_on == obj.created_on) || [];
+		if(workout_arr.length > 0) {
+			storage_arr.splice(storage_arr.indexOf(workout_arr[0]), 1, obj);
+		} else {
+			storage_arr.push(obj);
+		}
+		localStorage['WorkoutApp'] = JSON.stringify(storage_arr);
 	}
 
 	if(obj.sets.length > 0) {
@@ -93,6 +111,5 @@ function Workout(obj, parent) {
 	} else {
 		this.addSet();
 	}
+	console.log(obj);
 }
-
-let workout = new Workout();
