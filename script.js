@@ -1,5 +1,5 @@
 function Workout(obj, parent) {
-	obj = obj || {created_on: new Date().getTime, sets: [55,96,85], title: 'Workout', status: ''};
+	obj = obj || {created_on: new Date().getTime(), sets: [55,66,55], title: 'Workout', status: ''};
 	parent = parent || document.body;
 
 	let root = this;
@@ -13,6 +13,12 @@ function Workout(obj, parent) {
 		title.setAttribute('contenteditable', 'true');
 		title.setAttribute('class', 'title');
 		title.innerText = obj.title;
+		title.addEventListener('blur', function() {
+			obj.title = this.innerText;
+		});
+
+	let setBox = document.createElement('div');
+		setBox.setAttribute('class', 'sets');
 
 	this.setTitle = function(str) {
 		title.innerText = str;
@@ -34,12 +40,19 @@ function Workout(obj, parent) {
 		let setDiv = document.createElement('div');
 			setDiv.setAttribute('class', 'set');
 		let set = document.createElement('div');
-			set.setAttribute('class', 'sets');
+			set.setAttribute('class', 'count');
 			set.innerText = ++setCount;
 		let reps = document.createElement('input');
 			reps.setAttribute('type', 'number');
 			reps.setAttribute('value', typeof repCount == 'number' ? repCount : 0);
 			reps.setAttribute('class', 'reps');
+			reps.addEventListener('blur', function() {
+				root.setTotal();
+				obj.sets[[].slice.call(setBox.children).indexOf(this.parentElement)] = parseInt(this.value);
+			});
+			reps.addEventListener('focus', function() {
+				this.select();
+			});
 			reps.addEventListener('keypress', function(e) {
 				if(e.keyCode == 13)
 					root.addSet();
@@ -47,7 +60,7 @@ function Workout(obj, parent) {
 
 		setDiv.appendChild(set);
 		setDiv.appendChild(reps);
-		wrapper.appendChild(setDiv);
+		setBox.appendChild(setDiv);
 		if(repCount == undefined || typeof repCount == 'object')
 			reps.select();
 	}
@@ -60,17 +73,23 @@ function Workout(obj, parent) {
 		}, 0);
 	}
 
+	this.setTotal = function() {
+		total.innerText = this.getTotal();
+	}
+
 	wrapper.appendChild(title);
 	wrapper.appendChild(total);
 	wrapper.appendChild(addSetBtn);
-	parent.insertBefore(wrapper, parent.firstChildElement);
+	wrapper.appendChild(setBox);
+	parent.appendChild(wrapper);
 
-	this.saveStorage = function() {
-		
+	this.json = function() {
+		return obj;
 	}
 
 	if(obj.sets.length > 0) {
 		obj.sets.forEach(el => this.addSet(el));
+		this.setTotal();
 	} else {
 		this.addSet();
 	}
