@@ -3,9 +3,9 @@ localStorage['WorkoutApp'] = localStorage['WorkoutApp'] || JSON.stringify([]);
 let foo = JSON.parse(localStorage['WorkoutApp']);
 
 if(foo.length > 0)
-	foo.forEach(el => new Workout(el));
+	foo.forEach(el => new Workout(el, document.getElementById('wrapper')));
 else
-	new Workout();
+	new Workout(false, document.getElementById('wrapper'));
 
 function Workout(obj, parent) {
 	obj = obj || {created_on: new Date().getTime(), sets: [], title: 'Workout', status: ''};
@@ -18,13 +18,22 @@ function Workout(obj, parent) {
 	let wrapper = document.createElement('div');
 		wrapper.setAttribute('class', 'workout');
 
-	let title = document.createElement('div');
-		title.setAttribute('contenteditable', 'true');
+	let title = document.createElement('input');
+		title.setAttribute('type', 'text');
 		title.setAttribute('class', 'title');
-		title.innerText = obj.title;
+		title.value = obj.title;
 		title.addEventListener('blur', function() {
-			obj.title = this.innerText;
-			root.save();
+			if(obj.title !== this.value) {
+				obj.title = this.value;
+				root.save();
+			}
+		});
+		title.addEventListener('focus', function() {
+			this.select();
+		});
+		title.addEventListener('keypress', function(e) {
+			if(e.keyCode == 13)
+				this.blur();
 		});
 
 	let setBox = document.createElement('div');
@@ -57,9 +66,11 @@ function Workout(obj, parent) {
 			reps.setAttribute('value', typeof repCount == 'number' ? repCount : 0);
 			reps.setAttribute('class', 'reps');
 			reps.addEventListener('blur', function() {
-				root.setTotal();
-				obj.sets[[].slice.call(setBox.children).indexOf(this.parentElement)] = parseInt(this.value);
-				root.save();
+				if(obj.sets[[].slice.call(setBox.children).indexOf(this.parentElement)] !== parseInt(this.value)) {
+					root.setTotal();
+					obj.sets[[].slice.call(setBox.children).indexOf(this.parentElement)] = parseInt(this.value);
+					root.save();
+				}
 			});
 			reps.addEventListener('focus', function() {
 				this.select();
@@ -102,7 +113,8 @@ function Workout(obj, parent) {
 		} else {
 			storage_arr.push(obj);
 		}
-		localStorage['WorkoutApp'] = JSON.stringify(storage_arr);
+		if(localStorage['WorkoutApp'] = JSON.stringify(storage_arr))
+			console.log('localStorage saved!')
 	}
 
 	if(obj.sets.length > 0) {
