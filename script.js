@@ -1,6 +1,6 @@
 localStorage['WorkoutApp'] = localStorage['WorkoutApp'] || JSON.stringify([]);
 
-let foo = JSON.parse(localStorage['WorkoutApp']);
+let foo = JSON.parse(localStorage['WorkoutApp']).filter(el => el.status !== 'done');
 
 if(foo.length > 0)
 	foo.forEach(el => new Workout(el, document.getElementById('wrapper')));
@@ -18,6 +18,9 @@ function Workout(obj, parent) {
 	let wrapper = document.createElement('div');
 		wrapper.setAttribute('class', 'workout');
 
+	let settings = document.createElement('div');
+		settings.setAttribute('class', 'settings');
+
 	let title = document.createElement('input');
 		title.setAttribute('type', 'text');
 		title.setAttribute('class', 'title');
@@ -25,7 +28,7 @@ function Workout(obj, parent) {
 		title.addEventListener('blur', function() {
 			if(obj.title !== this.value) {
 				obj.title = this.value;
-				root.save();
+				root.localSave();
 			}
 		});
 		title.addEventListener('focus', function() {
@@ -69,7 +72,7 @@ function Workout(obj, parent) {
 				if(obj.sets[[].slice.call(setBox.children).indexOf(this.parentElement)] !== parseInt(this.value)) {
 					root.setTotal();
 					obj.sets[[].slice.call(setBox.children).indexOf(this.parentElement)] = parseInt(this.value);
-					root.save();
+					root.localSave();
 				}
 			});
 			reps.addEventListener('focus', function() {
@@ -84,7 +87,7 @@ function Workout(obj, parent) {
 		setDiv.appendChild(reps);
 		setBox.appendChild(setDiv);
 		if(repCount == undefined || typeof repCount == 'object')
-			reps.select();
+			reps.focus();
 	}
 		
 		addSetBtn.addEventListener('click', this.addSet);
@@ -99,13 +102,18 @@ function Workout(obj, parent) {
 		total.innerText = this.getTotal();
 	}
 
+	this.done = function() {
+		obj.status = 'done';
+	}
+
+	wrapper.appendChild(settings);
 	wrapper.appendChild(title);
 	wrapper.appendChild(total);
 	wrapper.appendChild(addSetBtn);
 	wrapper.appendChild(setBox);
 	parent.appendChild(wrapper);
 
-	this.save = function() {
+	this.localSave = function() {
 		let storage_arr = JSON.parse(localStorage['WorkoutApp']);
 		let workout_arr = storage_arr.filter(el => el.created_on == obj.created_on) || [];
 		if(workout_arr.length > 0) {
@@ -114,7 +122,11 @@ function Workout(obj, parent) {
 			storage_arr.push(obj);
 		}
 		if(localStorage['WorkoutApp'] = JSON.stringify(storage_arr))
-			console.log('localStorage saved!')
+			console.log('Saved locally!')
+	}
+
+	this.remoteSave = function() {
+
 	}
 
 	if(obj.sets.length > 0) {

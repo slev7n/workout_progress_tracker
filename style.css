@@ -1,6 +1,6 @@
 #wrapper {
 	display:grid;
-	grid-template-columns: repeat(5, 1fr);
+	grid-template-columns: repeat(6, 1fr);
 }
 
 .workout {
@@ -8,19 +8,40 @@
 	position: relative;
 	margin:10px;
 	border:1px solid rgba(0,0,0,.1);
-	padding:10px;
+	padding:30px 10px 10px 10px;
+}
+
+.settings {
+	position:absolute;
+	top:3px;
+	right:3px;
+	width:24px;
+	height: 24px;
+	background: url('img/settings.svg');
+	opacity: 0;
+	transition:opacity .5s ease;
+}
+
+.workout:hover .settings {
+	opacity:.25;
 }
 
 .title {
 	width:100%;
+	font-size:25px;
+	font-family: sans-serif;
+	border:none;
 }
 
+
 .total {
+	font-size: 25px;
 	font-weight: bold;
 }
 
 .total::before {
 	content: "Total";
+	font-size:initial;
 	display: block;
 	font-weight: normal;
 }
@@ -37,7 +58,7 @@
 	padding:3px;
 }
 
-.add-set:hover {
+.add-set:hover, .title:hover, .reps:hover, .settings:hover {
 	cursor:pointer;
 }
 
@@ -79,5 +100,15 @@
 
 .reps {
 	width:100%;
+}
+
+@media screen and (max-width: 305px) {
+	#wrapper {
+		grid-template-columns: 1fr;
+	}
+
+	.workout {
+		width:90%;
+	}
 }
 
